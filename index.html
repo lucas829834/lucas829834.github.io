@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ritmo BR</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+    }
+
+    h1 {
+      background: linear-gradient(to right, #ff9900, #ff0066);
+      padding: 20px;
+      margin: 0;
+      font-size: 24px;
+    }
+
+    #menu {
+      margin-top: 20px;
+    }
+
+    .btn {
+      background: #222;
+      color: #fff;
+      padding: 12px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #444;
+    }
+
+    #gameArea {
+      margin-top: 30px;
+      display: none;
+    }
+
+    canvas {
+      background: #111;
+      border: 2px solid #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎵 RITMO BR 🎮</h1>
+
+  <div id="menu">
+    <p>Escolha o ritmo:</p>
+    <button class="btn" onclick="startGame('sertanejo')">Sertanejo</button>
+    <button class="btn" onclick="startGame('funk')">Funk</button>
+    <button class="btn" onclick="startGame('gospel')">Gospel</button>
+    <button class="btn" onclick="startGame('brega')">Brega</button>
+    <button class="btn" onclick="startGame('forro')">Forró</button>
+  </div>
+
+  <div id="gameArea">
+    <p>Toque nos blocos pretos!</p>
+    <canvas id="gameCanvas" width="300" height="400"></canvas><br />
+    <button class="btn" onclick="stopGame()">Voltar</button>
+  </div>
+
+  <audio id="audio" src=""></audio>
+
+  <script>
+    const audio = document.getElementById('audio');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const gameArea = document.getElementById('gameArea');
+    const menu = document.getElementById('menu');
+
+    let tiles = [];
+    let interval;
+    let tileHeight = 60;
+
+    const songs = {
+      sertanejo: 'https://cdn.pixabay.com/audio/2022/03/14/audio_403c8f55e2.mp3',
+      funk: 'https://cdn.pixabay.com/audio/2023/03/29/audio_d645e1982a.mp3',
+      gospel: 'https://cdn.pixabay.com/audio/2022/07/27/audio_4625a7b03e.mp3',
+      brega: 'https://cdn.pixabay.com/audio/2021/08/04/audio_e64b59f40a.mp3',
+      forro: 'https://cdn.pixabay.com/audio/2022/03/14/audio_2336d09a62.mp3'
+    };
+
+    function startGame(style) {
+      menu.style.display = 'none';
+      gameArea.style.display = 'block';
+
+      audio.src = songs[style];
+      audio.play();
+
+      tiles = [];
+      for (let i = 0; i < 5; i++) {
+        tiles.push({
+          x: Math.floor(Math.random() * 3) * 100,
+          y: -i * tileHeight * 3
+        });
+      }
+
+      interval = setInterval(updateGame, 50);
+    }
+
+    function stopGame() {
+      clearInterval(interval);
+      audio.pause();
+      gameArea.style.display = 'none';
+      menu.style.display = 'block';
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      tiles.forEach((tile, index) => {
+        if (
+          clickX > tile.x && clickX < tile.x + 100 &&
+          clickY > tile.y && clickY < tile.y + tileHeight
+        ) {
+          tiles.splice(index, 1);
+          tiles.push({
+            x: Math.floor(Math.random() * 3) * 100,
+            y: -tileHeight
+          });
+        }
+      });
+    });
+
+    function updateGame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      tiles.forEach(tile => {
+        tile.y += 5;
+        ctx.fillStyle = '#000';
+        ctx.fillRect(tile.x, tile.y, 100, tileHeight);
+      });
+    }
+  </script>
+</body>
+</html>
